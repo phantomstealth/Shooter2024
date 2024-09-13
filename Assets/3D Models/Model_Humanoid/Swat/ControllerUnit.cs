@@ -8,8 +8,6 @@ using UnityEditor.XR.LegacyInputHelpers;
 
 public class ControllerUnit : MonoBehaviour
 {
-    public Text infoObjectTXT;
-
     [Header("Animation")]
     public Animator anim;
     private AnimatorClipInfo[] m_CurrentClipInfo;
@@ -30,6 +28,9 @@ public class ControllerUnit : MonoBehaviour
     public AudioClip Walk_a;
     public AudioClip hitme_a;
     public AudioClip LandingAudioClip;
+    public AudioClip[] FootstepAudioClips;
+    [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
+
 
 
     [HideInInspector]
@@ -84,7 +85,6 @@ public class ControllerUnit : MonoBehaviour
     }
     void Start()
     {
-        infoObjectTXT = GameObject.Find("textInfoObject").GetComponent<Text>();
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -132,15 +132,26 @@ public class ControllerUnit : MonoBehaviour
         source.Play();
     }
 
+    private void OnFootstep(AnimationEvent animationEvent)
+    {
+        if (animationEvent.animatorClipInfo.weight > 0.5f)
+        {
+            if (FootstepAudioClips.Length > 0)
+            {
+                var index = UnityEngine.Random.Range(0, FootstepAudioClips.Length);
+                // MTT CHANGE START (for simplicity's sake, playing at the transform's position suffices)
+                AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.position, FootstepAudioVolume);
+                // MTT CHANGE END
+            }
+        }
+    }
+
 
     public void OnLand(AnimationEvent animationEvent)
     {
-        //Debug.Log("Try PlaySound"+animationEvent.animatorClipInfo.weight);
         //if (animationEvent.animatorClipInfo.weight > 0.4f)
         {
-            //AudioSource.PlayClipAtPoint(LandingAudioClip, transform.position, FootstepAudioVolume);
-            PlayAudio(LandingAudioClip, false);
-            Debug.Log("PlaySound - Ok");
+            AudioSource.PlayClipAtPoint(LandingAudioClip, transform.position, FootstepAudioVolume);
         }
     }
 
@@ -283,23 +294,10 @@ public class ControllerUnit : MonoBehaviour
 
     }
 
-    void InfoAboutGameObject(GameObject game_object)
-    {
-        if (game_object.GetComponent<Info_Object>() != null)
-        {
-            infoObjectTXT.text = game_object.GetComponent<Info_Object>().nameObject+" "+game_object.GetComponent<Info_Object>().healthObject+"%";
-        }
-        else
-            infoObjectTXT.text = "";
-    }
-
     void CheckRaycast()
     {
         RaycastHit hit;
-        RaycastHit hitUI;
-        Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, 1000, 1);
-        Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hitUI, 1000, 5);
-
+        Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, 1000, 0);
         float distanceHit;
         Vector3 hitTrue;
         if (hit.transform != null)
@@ -308,13 +306,11 @@ public class ControllerUnit : MonoBehaviour
             hitTrue = hit.point;
             distanceHit = Vector3.Distance(playerCamera.transform.position, hit.point);
             RaycastSphere.transform.position = hit.point;
-            InfoAboutGameObject(hit.transform.gameObject);
         }
         else
         {
             if (debugDrawLine) Debug.DrawLine(playerCamera.transform.position, playerCamera.transform.position + playerCamera.transform.forward * 1000, Color.green);
             RaycastSphere.transform.position = playerCamera.transform.position + playerCamera.transform.forward * 1000;
-            infoObjectTXT.text = "";
         }
     }
 

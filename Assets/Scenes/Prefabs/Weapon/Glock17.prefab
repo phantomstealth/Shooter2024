@@ -159,15 +159,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40aae4911c5d6bb458c422114acc790e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  countButtonTXT: {fileID: 0}
   shot: {fileID: 8300000, guid: 0cc2cd15f3e2f654aa8dc41528b234e1, type: 3}
   emptyClip: {fileID: 8300000, guid: dd43038411693a44dae6fd85c9d7fe01, type: 3}
   reloadClip: {fileID: 8300000, guid: b84d91b6a9cd7764fbc316cf13700682, type: 3}
   weaponRange: 1000
   automaticGun: 0
   maxClipAmmo: 17
-  currentAmmo: 50
-  currentClipAmmo: 17
+  currentAmmo: 3
+  currentClipAmmo: 2
   maxDamage: 15
+  Player: {fileID: 0}
 --- !u!114 &299399686468125808
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180,12 +182,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10caba986445df747a12a94dad6495e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  infoObjectTXT: {fileID: 0}
+  redKnob: {fileID: 273226125755756099, guid: 19eef0ce3d991ca4c888c3c7be7118ba, type: 3}
   nameWeapon: Glock 17
   startBullet: {fileID: 1665499756577202737}
   debugDrawLine_Weapon: 1
   nameLayer: 1
   typeWeaponList: 1
   ImpactParticleSystem: {fileID: 9154229115824779020, guid: bea52fb8e8f079b42be86c1f0164604a,
+    type: 3}
+  SoundEffect: {fileID: 119301691075131479, guid: 220d2cff60e861b4babe76949781ce55,
     type: 3}
   Mask:
     serializedVersion: 2
@@ -207,7 +213,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -217,9 +223,9 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 500
+  MaxDistance: 40
   Pan2D: 0
-  rolloffMode: 0
+  rolloffMode: 2
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -252,7 +258,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0

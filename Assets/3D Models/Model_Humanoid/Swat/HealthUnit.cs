@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CharacterUnit : MonoBehaviour
+public class HealthUnit : MonoBehaviour
 {
     private Text healthCharacterTXT;
     public int healthCharacter=100;

@@ -1,52 +1,56 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 public class ControllerWeapon : MonoBehaviour
 {
     public GameObject currentWeapon;
+    public Arsenal currentArsenal;
     public Weapon.tWeapon typeWeapon = 0;
     public GameObject branchRifle;
     public GameObject branchPistol;
     public Arsenal[] arsenal;
     private Animator anim;
 
+    public RigBuilder rigbuilder;
+
     private GameObject weaponInHand;
 
     int baseLayerAnim;
     int pistolLayerAnim;
     int rifleLayerAnim;
+    public int numCurrentWeapon;
 
     [System.Serializable]
     public struct Arsenal
     {
         public GameObject Weapon;
-        public int Ammo;
+        public int AmmoIntoClip;
+        public int AmmoTotal;
     }
 
-    private void Awake()
-    {
-    }
     void Start()
     {
         anim = gameObject.GetComponent<ControllerUnit>().anim;
         baseLayerAnim = anim.GetLayerIndex("Base Layer");
         pistolLayerAnim = anim.GetLayerIndex("Pistol_Aim");
         rifleLayerAnim = anim.GetLayerIndex("Rifle_Aim");
-        for (int i = 0; i <= 3; i++)
-        {
-           if (arsenal[i].Weapon!=null) arsenal[i].Ammo = arsenal[i].Weapon.GetComponent<CharacterWeapon>().currentAmmo;
-           Debug.Log(i);
-        }
-
+        rigbuilder = GetComponent<RigBuilder>();
     }
 
     private void ChangeWeapon(int numWeapon)
     {
+        List<RigLayer> layers = rigbuilder.layers;
+        numCurrentWeapon = numWeapon;
         currentWeapon = arsenal[numWeapon].Weapon;
+        currentArsenal = arsenal[numWeapon];
         if (currentWeapon != null)
         {
             typeWeapon = currentWeapon.GetComponent<Weapon>().typeWeaponList;
+            currentWeapon.GetComponent<CharacterWeapon>().currentAmmo = arsenal[numWeapon].AmmoTotal;
+            currentWeapon.GetComponent<CharacterWeapon>().currentClipAmmo = arsenal[numWeapon].AmmoIntoClip;
+            currentWeapon.GetComponent<CharacterWeapon>().Player = gameObject;
         }
         else
         {
@@ -60,7 +64,8 @@ public class ControllerWeapon : MonoBehaviour
             weaponInHand = Instantiate(currentWeapon,branchPistol.transform);
             anim.SetLayerWeight(pistolLayerAnim, 1);
             anim.SetLayerWeight(rifleLayerAnim, 0);
-
+            layers[1].active = true;
+            layers[0].active = false;
         }
         else if (typeWeapon == Weapon.tWeapon.Rifle)
         {
@@ -70,6 +75,8 @@ public class ControllerWeapon : MonoBehaviour
             weaponInHand = Instantiate(currentWeapon,branchRifle.transform);
             anim.SetLayerWeight(pistolLayerAnim, 0);
             anim.SetLayerWeight(rifleLayerAnim, 1);
+            layers[0].active = true;
+            layers[1].active = false;
 
         }
         else
@@ -79,6 +86,8 @@ public class ControllerWeapon : MonoBehaviour
             branchPistol.SetActive(false);
             anim.SetLayerWeight(pistolLayerAnim, 0);
             anim.SetLayerWeight(rifleLayerAnim, 0);
+            layers[0].active = true;
+            layers[1].active = false;
         }
     }
 

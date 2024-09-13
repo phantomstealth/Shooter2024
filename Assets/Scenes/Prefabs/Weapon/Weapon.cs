@@ -1,9 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 using UnityEngine;
+using UnityEngine.UI;
+
 
 public class Weapon : MonoBehaviour
 {
+    public Text infoObjectTXT;
+    public GameObject redKnob;
+    private GameObject _redKnob;
+
     [Header("Weapon Settings")]
     public string nameWeapon;
     public GameObject startBullet;
@@ -29,6 +36,8 @@ public class Weapon : MonoBehaviour
     private GameObject trail;
     [SerializeField]
     private GameObject ImpactParticleSystem;
+    [SerializeField]
+    private GameObject SoundEffect;
 
     [SerializeField]
     private LayerMask Mask;
@@ -55,12 +64,44 @@ public class Weapon : MonoBehaviour
     private Vector3 hitNormal;
 
     private RaycastHit hitWeapon;
+    private RaycastHit hitUI;
+
+    private GameObject prev_gameobject;
+   
 
 
     private void Start()
     {
         charWeapon =gameObject.GetComponent<CharacterWeapon>();
+        infoObjectTXT = GameObject.Find("textInfoObject").GetComponent<Text>();
+        _redKnob=Instantiate(redKnob, gameObject.transform);
     }
+
+    void InfoAboutGameObject(GameObject game_object)
+    {
+        if (game_object.GetComponent<Info_Object>() != null)
+        {
+            infoObjectTXT.text = game_object.GetComponent<Info_Object>().nameObject + " " + game_object.GetComponent<Info_Object>().healthObject + " HP";
+            if (prev_gameobject != game_object)
+            {
+                if (prev_gameobject != null)
+                {
+                    if (prev_gameobject.GetComponent<Info_Object>() != null) prev_gameobject.GetComponent<Info_Object>().OnHoverExit();
+                }
+                game_object.GetComponent<Info_Object>().OnHoverEnter();
+                //Debug.Log("In");
+                prev_gameobject = game_object;
+            }
+        }
+        else if (prev_gameobject!=null)
+        {
+            infoObjectTXT.text = "";
+            prev_gameobject.GetComponent<Info_Object>().OnHoverExit();
+            prev_gameobject = null;
+            //Debug.Log("Out");
+        }
+    }
+
 
     // Start is called before the first frame update
     void CheckRaycast()
@@ -70,10 +111,15 @@ public class Weapon : MonoBehaviour
         if (hitWeapon.transform != null)
         {
             if (debugDrawLine_Weapon) Debug.DrawLine(startBullet.transform.position, hitWeapon.point, Color.red);
+            InfoAboutGameObject(hitWeapon.transform.gameObject);
+            _redKnob.transform.position = hitWeapon.point;
+            _redKnob.transform.rotation = Quaternion.LookRotation(hitWeapon.normal);
         }
         else
         {
             if (debugDrawLine_Weapon) Debug.DrawLine(startBullet.transform.position, startBullet.transform.position + startBullet.transform.forward * 1000, Color.red);
+            //_redKnob.transform.position = hitWeapon.point;
+            infoObjectTXT.text = "";
         }
     }
 
@@ -140,6 +186,7 @@ public class Weapon : MonoBehaviour
         if (target_object.GetComponent<Info_Object>() != null)
         {
             target_object.GetComponent<Info_Object>().Damage(damage);
+            Debug.Log(target_object.GetComponent<Info_Object>().materialObject);
         }
     }
 
@@ -159,7 +206,13 @@ public class Weapon : MonoBehaviour
                 if (madeImpact)
                 {
                     GameObject ImpactGo = Instantiate(ImpactParticleSystem, hitPoint, Quaternion.LookRotation(hitNormal));
+                    GameObject ImpactSound = Instantiate(SoundEffect, hitPoint, Quaternion.LookRotation(hitNormal));
                     ImpactGo.transform.SetParent(hitWeapon.transform.gameObject.transform);
+                    if (target_object.GetComponent<Info_Object>() != null)
+                    {
+                        ImpactSound.GetComponent<EffectSound>().materialObject = target_object.GetComponent<Info_Object>().materialObject;
+                        ImpactSound.GetComponent<EffectSound>().AudioByMaterial();
+                    }
                     madeImpact = false;
                     DamageObject(charWeapon.maxDamage);
                 }

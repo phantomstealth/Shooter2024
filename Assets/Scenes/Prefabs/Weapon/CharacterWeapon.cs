@@ -24,6 +24,8 @@ public class CharacterWeapon : MonoBehaviour
     public int currentClipAmmo;
     public int maxDamage;
 
+    public GameObject Player;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -54,15 +56,25 @@ public class CharacterWeapon : MonoBehaviour
         PlayAudio(shot, false);
         currentAmmo = currentAmmo - 1;
         currentClipAmmo = currentClipAmmo - 1;
+        syncWeapon();
         return true;
     }
 
+    void syncWeapon()
+    {
+        int numCurWeapon = Player.GetComponent<ControllerWeapon>().numCurrentWeapon;
+        Player.GetComponent<ControllerWeapon>().currentArsenal.AmmoTotal = currentAmmo;
+        Player.GetComponent<ControllerWeapon>().currentArsenal.AmmoIntoClip = currentClipAmmo;
+        Player.GetComponent<ControllerWeapon>().arsenal[numCurWeapon].AmmoTotal = currentAmmo;
+        Player.GetComponent<ControllerWeapon>().arsenal[numCurWeapon].AmmoIntoClip = currentClipAmmo;
+    }
     void Reload_Weapon()
     {
         if (currentAmmo <= 0 || maxClipAmmo < currentClipAmmo) return;
         if (maxClipAmmo < currentAmmo)
         {
             currentClipAmmo = maxClipAmmo;
+            syncWeapon();
         }
         else currentClipAmmo = currentAmmo;
         PlayAudio(reloadClip, false);
